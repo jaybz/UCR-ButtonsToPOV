@@ -1,0 +1,76 @@
+name: release
+
+on:
+  push:
+    tags: 'v*'
+
+jobs:
+  ucrcore:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cache UCR.Core.dll
+      id: cache-ucr-core-dll
+      uses: actions/cache@v2
+      with:
+        path: UCR.Core.dll
+        key: ucr-core-dll
+    - name: Fetch UCR v0.9.0 release
+      if: steps.cache-ucr-core-dll.outputs.cache-hit != 'true'
+      uses: dsaltares/fetch-gh-release-asset@0.0.5
+      with:
+        repo: Snoothy/UCR
+        version: tags/v0.9.0
+        file: UCR_v0.9.0.zip
+    - name: Extract UCR.Core
+      if: steps.cache-ucr-core-dll.outputs.cache-hit != 'true'
+      run: 7z e UCR_v0.9.0.zip -o. */UCR.Core.dll
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ucr-core-dll
+        path: UCR.Core.dll
+  
+  build:
+    needs: ucrcore
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Cache UCR.Core.dll
+      id: cache-ucr-core-dll
+      uses: actions/cache@v2
+      with:
+        path: UCR.Core.dll
+        key: ucr-core-dll
+    - uses: actions/download-artifact@v2
+      if: steps.cache-ucr-core-dll.outputs.cache-hit != 'true'
+      with:
+        name: ucr-core-dll
+    - name: Restore dependencies
+      run: dotnet restore 
+    - name: Build
+      run: dotnet build --no-restore -c Release -o artifacts
+    - name: Package
+      run: 7z a artifacts\UCR-ButtonsToPOV.zip ./artifacts/ButtonsToPOV.dll
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: artifacts\UCR-ButtonsToPOV.zip
+        asset_name: UCR-ButtonsToPOV.zip
+        asset_content_type: application/zip
