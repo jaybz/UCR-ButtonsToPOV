@@ -25,10 +25,9 @@ jobs:
         repo: Snoothy/UCR
         version: tags/v0.9.0
         file: UCR_v0.9.0.zip
-        target: UCR.zip
-    - name: Find zip files
-      run: find . -iname \*.zip
     - name: Extract UCR.Core
-      run: 7z e UCR.zip -o. UCR.Core.dll
+      run: 7z e UCR_v0.9.0.zip -o. UCR.Core.dll
+    - name: Find UCR.Core.dll
+      run: find . -iname UCR.Core.dll
     - name: Build
       run: dotnet build --no-restore
