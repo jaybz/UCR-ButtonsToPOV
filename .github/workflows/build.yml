@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  ucr:
+  ucrcore:
     runs-on: ubuntu-latest
     steps:
     - name: Cache UCR.Core.dll
@@ -26,7 +26,7 @@ jobs:
       run: 7z e UCR_v0.9.0.zip -o. */UCR.Core.dll
   
   build:
-    needs: ucr
+    needs: ucrcore
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
