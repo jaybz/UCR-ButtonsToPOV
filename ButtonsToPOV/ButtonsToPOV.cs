@@ -10,17 +10,17 @@ namespace ButtonsToPOV
     [PluginInput(DeviceBindingCategory.Momentary, "POV Right")]
     [PluginInput(DeviceBindingCategory.Momentary, "POV Down")]
     [PluginInput(DeviceBindingCategory.Momentary, "POV Left")]
-    [PluginInput(DeviceBindingCategory.Momentary, "POV Recenter")]
+    [PluginInput(DeviceBindingCategory.Momentary, "POV Re-center")]
     [PluginOutput(DeviceBindingCategory.Momentary, "POV Up")]
     [PluginOutput(DeviceBindingCategory.Momentary, "POV Right")]
     [PluginOutput(DeviceBindingCategory.Momentary, "POV Down")]
     [PluginOutput(DeviceBindingCategory.Momentary, "POV Left")]
     public class ButtonsToPOV : Plugin
     {
-        [PluginGui("Up/Down Autocenter Mode")]
+        [PluginGui("Up/Down Centering Mode")]
         public CenteringType AutoCenterUD { get; set; }
 
-        [PluginGui("Left/Right Autocenter Mode")]
+        [PluginGui("Left/Right Centering Mode")]
         public CenteringType AutoCenterLR { get; set; }
 
         private Direction currentUD = Direction.Center;
