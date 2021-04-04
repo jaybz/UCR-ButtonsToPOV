@@ -1,9 +1,10 @@
 name: release
 
 on:
-  push:
-    tags: 'v*'
-
+  release:
+    types:
+      - published
+      
 jobs:
   ucrcore:
     runs-on: ubuntu-latest
@@ -54,23 +55,18 @@ jobs:
       run: dotnet build --no-restore -c Release -o artifacts
     - name: Package
       run: 7z a artifacts\UCR-ButtonsToPOV.zip ./artifacts/ButtonsToPOV.dll
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+    - name: Get release info
+      id: get_release
+      uses: bruceadams/get-release@v1.2.2
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+        GITHUB_TOKEN: ${{ github.token }}
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        upload_url: ${{ steps.get_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: artifacts\UCR-ButtonsToPOV.zip
         asset_name: UCR-ButtonsToPOV.zip
         asset_content_type: application/zip
